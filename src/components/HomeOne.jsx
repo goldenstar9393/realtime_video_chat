@@ -1,31 +1,25 @@
 'use client'
-import React, { useRef, useState, useEffect } from 'react';
-import Modal from './UnlockModal';
-import home1 from '@/images/home1.png';
-import cam from '@/images/camnyt.png';
-import video from '@/images/video.png';
-import lock from '@/images/lock.png';
 import apple from '@/images/apple.png';
+import cam from '@/images/camnyt.png';
+import fbLogoIcon from '@/images/fbLogoIcon.png';
 import google from '@/images/google.png';
-import star from '@/images/star.png';
-import setting from '@/images/setting.png';
-import male from '@/images/male.png'
+import googleIcon from '@/images/googleIcon.png';
+import home1 from '@/images/home1.png';
+import leftGirlImage from '@/images/leftGirlImage.jpg';
+import lock from '@/images/lock.png';
 import maleIcon from '@/images/maleIcon.png';
-import femaleIcon from '@/images/femaleIcon.png';
-import coupleIcon from '@/images/coupleIcon.png';
-import { Share2, AlignJustify, MoveRight } from 'lucide-react';
-import { Emoji, EmojiStyle } from 'emoji-picker-react';
+import setting from '@/images/setting.png';
+import star from '@/images/star.png';
+import video from '@/images/video.png';
+import { AlignJustify, Share2 } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
 import InputEmoji from "react-input-emoji";
 import 'tailwindcss/tailwind.css';
-import leftGirlImage from '@/images/leftGirlImage.jpg'
-import leftGirl2 from '@/images/leftImage2.jpg'
-import googleIcon from '@/images/googleIcon.png'
-import fbLogoIcon from '@/images/fbLogoIcon.png'
-import Image from 'next/image';
 
-import { Socket, io } from "socket.io-client";
+import { io } from "socket.io-client";
 
-const URL = "http://localhost:4000";
+const URL = "https://check2-djcs.onrender.com";
 export default function HomeOne() {
 
     const [isChecked, setIsChecked] = useState(false);
@@ -218,7 +212,6 @@ export default function HomeOne() {
                     })
                 }
             }
-
             socket.emit("answer", {
                 roomId,
                 sdp: sdp
@@ -271,17 +264,26 @@ export default function HomeOne() {
         socket.on("answer", ({ roomId, sdp: remoteSdp }) => {
             setLobby(false);
             setSendingPc(pc => {
-                pc?.setRemoteDescription(remoteSdp)
+                if (pc) {
+                    pc.setRemoteDescription(remoteSdp)
+                        .then(() => {
+                            // Remote description successfully set
+                            console.log("Remote description set successfully.");
+                        })
+                        .catch(error => {
+                            // Error setting remote description
+                            console.error("Error setting remote description:", error);
+                        });
+                }
                 return pc;
             });
-            //console.log("loop closed");
+            // Handle lobby event
             socket.on("lobby", () => {
                 setLobby(true);
-
-                // socket.emit("disconnect_room", { targetSocketId: roomId })
-                socket.emit("connect_room", { targetSocketId: roomId })
-            })
-        })
+                socket.emit("connect_room", { targetSocketId: roomId });
+            });
+        });
+        
 
 
 
